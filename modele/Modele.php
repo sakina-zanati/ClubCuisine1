@@ -1,41 +1,36 @@
 <?php
 
-// Renvoie la liste des billets du blog
-function getBillets() {
+// Renvoie la liste des cours de cuisine
+function getLesCours() {
     $bdd = getBdd();
-    $billets = $bdd->query('select BIL_ID as id, BIL_DATE as date,'
-            . ' BIL_TITRE as titre, BIL_CONTENU as contenu from T_BILLET'
-            . ' order by BIL_ID desc');
-    return $billets;
+    $lescours = $bdd->query('select * from cours');
+    return $lescours;
 }
 
-// Renvoie les informations sur un billet
-function getBillet($idBillet) {
+// Renvoie les informations sur un cours et le chef qui l'assure
+function getCours($numCours) {
     $bdd = getBdd();
-    $billet = $bdd->prepare('select BIL_ID as id, BIL_DATE as date,'
-            . ' BIL_TITRE as titre, BIL_CONTENU as contenu from T_BILLET'
-            . ' where BIL_ID=?');
-    $billet->execute(array($idBillet));
-    if ($billet->rowCount() == 1)
-        return $billet->fetch();  // Accès à la première ligne de résultat
+    $cours = $bdd->prepare('select numcours,libellecours, dureecours,
+    nomchef, prenomchef from cours JOIN chef on numchef = numchefcours where numcours = ?');
+    $cours->execute(array($numCours));
+    if ($cours->rowCount() == 1)
+        return $cours->fetch();  // Accès à la première ligne de résultat
     else
-        throw new Exception("Aucun billet ne correspond à l'identifiant '$idBillet'");
+        throw new Exception("Aucun cours ne correspond à l'identifiant '$idBillet'");
 }
 
-// Renvoie la liste des commentaires associés à un billet
-function getCommentaires($idBillet) {
+// Renvoie la liste des sessions associées à un cours
+function getSessions($numCours) {
     $bdd = getBdd();
-    $commentaires = $bdd->prepare('select COM_ID as id, COM_DATE as date,'
-            . ' COM_AUTEUR as auteur, COM_CONTENU as contenu from T_COMMENTAIRE'
-            . ' where BIL_ID=?');
-    $commentaires->execute(array($idBillet));
-    return $commentaires;
+    $sessions = $bdd->prepare('select * from session where numcourssession = ?' ;
+    $sessions->execute(array($numCours));
+    return $sessions;
 }
 
 // Effectue la connexion à la BDD
 // Instancie et renvoie l'objet PDO associé
 function getBdd() {
-    $bdd = new PDO('mysql:host=localhost;dbname=monblog;charset=utf8', 'root',
-            '', array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+    $bdd = new PDO('mysql:host=localhost;dbname=club-cuisine;charset=utf8', 'ts2',
+            'ts2', array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
     return $bdd;
 }
